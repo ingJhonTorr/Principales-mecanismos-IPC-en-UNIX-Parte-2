@@ -6,6 +6,66 @@ Es un mecanismo de comunicación entre procesos que permite que los procesos se 
 Las colas de mensajes son especialmente útiles en situaciones donde varios procesos deben compartir información o coordinarse sin la necesidad de una comunicación directa o en tiempo real. Cada mensaje puede contener datos específicos y proporcionar una forma estructurada de intercambio de información entre procesos.
 Se presentan dos ejemplos en C que utilizan Colas de Mensajes:
 
+#### **Mensaje Específico entre Procesos con Colas de Mensajes**
+Estos dos programas en C muestran una forma de comunicación específica entre procesos utilizando colas de mensajes. El **Proceso1** crea una cola de mensajes y envía un tipo de mensaje específico al **Proceso2**. El **Proceso2** abre la cola de mensajes y recibe únicamente el mensaje con el tipo especificado.
+
+#### **Código del Proceso 1:**
+
+```c
+    #include <stdio.h>
+    #include <stdlib.h>
+    #include <sys/msg.h>
+    #include <string.h>
+    
+    struct mensaje {
+        long tipo;
+        char texto[100];
+    };
+    
+    int main() {
+        key_t clave;
+        int id_cola;
+        struct mensaje mensaje_enviar;
+    
+        clave = ftok("/tmp", 'A');
+        id_cola = msgget(clave, IPC_CREAT | 0666);
+        mensaje_enviar.tipo = 2;
+        strcpy(mensaje_enviar.texto, "Hola desde el Proceso 1");
+        msgsnd(id_cola, &mensaje_enviar, sizeof(mensaje_enviar.texto), 0);
+        printf("Mensaje enviado: %s\n", mensaje_enviar.texto);
+    
+        return 0;
+    }
+```
+
+#### **Código del Proceso 2:**
+
+```c
+    #include <stdio.h>
+    #include <stdlib.h>
+    #include <sys/msg.h>
+    #include <string.h>
+    
+    struct mensaje {
+        long tipo;
+        char texto[100];
+    };
+    
+    int main() {
+        key_t clave;
+        int id_cola;
+        struct mensaje mensaje_recibido;
+    
+        clave = ftok("/tmp", 'A');
+        id_cola = msgget(clave, 0666);
+        msgrcv(id_cola, &mensaje_recibido, sizeof(mensaje_recibido.texto),2, 0);
+        printf("Soy el Proceso 2\n");
+        printf("Mensaje recibido: %s\n", mensaje_recibido.texto);
+    
+        return 0;
+    }
+```
+
 #### **Comunicación Asíncrona entre Procesos con Colas de Mensajes**
 Estos dos programas en C ilustran la comunicación asíncrona entre procesos utilizando colas de mensajes en sistemas Unix. El **emisor** crea una cola de mensajes y envía mensajes a la misma. El **receptor** abre la cola de mensajes y recibe los mensajes enviados por el emisor. La comunicación es bidireccional y continua hasta que el usuario decide salir precionando la letra **q**. Este ejemplo muestra cómo configurar y utilizar colas de mensajes para permitir la comunicación entre procesos de manera eficiente y asíncrona.
 
